@@ -3,6 +3,7 @@ import torch.nn as nn
 import utils
 import torchvision
 import os
+from tqdm import tqdm
 
 
 def data_transform(X):
@@ -29,7 +30,7 @@ class DiffusiveRestoration:
     def restore(self, val_loader, validation='snow', r=None):
         image_folder = os.path.join(self.args.image_folder, self.config.data.dataset, validation)
         with torch.no_grad():
-            for i, (x, y) in enumerate(val_loader):
+            for i, (x, y) in tqdm(enumerate(val_loader), desc=f"Restoring {validation} images", total=len(val_loader)):
                 print(f"starting processing from image {y}")
                 x = x.flatten(start_dim=0, end_dim=1) if x.ndim == 5 else x
                 x_cond = x[:, :3, :, :].to(self.diffusion.device)

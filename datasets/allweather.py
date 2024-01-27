@@ -18,11 +18,11 @@ class AllWeather:
     def get_loaders(self, parse_patches=True, validation='snow'):
         if validation == 'raindrop':
             print("=> evaluating raindrop test set...")
-            path = os.path.join(self.config.data.data_dir, 'data', 'raindrop', 'test')
+            path = os.path.join(self.config.data.data_dir, 'data', 'raindrop')
             filename = 'raindroptesta.txt'
         elif validation == 'rainfog':
             print("=> evaluating outdoor rain-fog test set...")
-            path = os.path.join(self.config.data.data_dir, 'data', 'outdoor-rain')
+            path = os.path.join(self.config.data.data_dir, 'data', 'rainfog')
             filename = 'test1.txt'
         else:   # snow
             print("=> evaluating snowtest100K-L...")
@@ -59,12 +59,14 @@ class AllWeatherDataset(torch.utils.data.Dataset):
     def __init__(self, dir, patch_size, n, transforms, filelist=None, parse_patches=True):
         super().__init__()
 
+        # self.dir = "./data/raindrop"  #for rain drop
         self.dir = dir
         train_list = os.path.join(dir, filelist)
         with open(train_list) as f:
             contents = f.readlines()
             input_names = [i.strip() for i in contents]
             gt_names = [i.strip().replace('input', 'gt') for i in input_names]
+
 
         self.input_names = input_names
         self.gt_names = gt_names
@@ -93,9 +95,11 @@ class AllWeatherDataset(torch.utils.data.Dataset):
         return tuple(crops)
 
     def get_images(self, index):
-        input_name = self.input_names[index]
-        gt_name = self.gt_names[index]
+        input_name = self.input_names[index].replace("./", "")
+        gt_name = self.gt_names[index].replace("./", "")
+        gt_name = gt_name.replace("rain.", "clean.")
         img_id = re.split('/', input_name)[-1][:-4]
+        aa = self.dir
         input_img = PIL.Image.open(os.path.join(self.dir, input_name)) if self.dir else PIL.Image.open(input_name)
         try:
             gt_img = PIL.Image.open(os.path.join(self.dir, gt_name)) if self.dir else PIL.Image.open(gt_name)
@@ -119,10 +123,11 @@ class AllWeatherDataset(torch.utils.data.Dataset):
             elif ht_new <= wd_new and wd_new > 1024:
                 ht_new = int(np.ceil(ht_new * 1024 / wd_new))
                 wd_new = 1024
-            wd_new = int(16 * np.ceil(wd_new / 16.0))
-            ht_new = int(16 * np.ceil(ht_new / 16.0))
-            input_img = input_img.resize((wd_new, ht_new), PIL.Image.ANTIALIAS)
-            gt_img = gt_img.resize((wd_new, ht_new), PIL.Image.ANTIALIAS)
+
+            wd_new = int(16 * (wd_new // 16))
+            ht_new = int(16 * (ht_new // 16))
+            input_img = input_img.crop((0, 0, wd_new, ht_new))
+            gt_img = gt_img.crop((0, 0, wd_new, ht_new))
 
             return torch.cat([self.transforms(input_img), self.transforms(gt_img)], dim=0), img_id
 

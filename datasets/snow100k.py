@@ -31,8 +31,8 @@ class Snow100K:
                                       parse_patches=parse_patches)
 
         if not parse_patches:
-            self.config.training.batch_size = 1
-            self.config.sampling.batch_size = 1
+            self.config.training.batch_size = 16
+            self.config.sampling.batch_size = 16
 
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=self.config.training.batch_size,
                                                    shuffle=True, num_workers=self.config.data.num_workers,

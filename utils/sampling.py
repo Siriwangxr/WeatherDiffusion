@@ -51,6 +51,7 @@ def generalized_steps_overlapping(x, x_cond, seq, model, b, eta=0., corners=None
         seq_next = [-1] + list(seq[:-1])
         x0_preds = []
         xs = [x]
+        # print(x.size())
 
         x_grid_mask = torch.zeros_like(x_cond, device=x.device)
         for (hi, wi) in corners:

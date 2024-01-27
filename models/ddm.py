@@ -9,6 +9,7 @@ import torch.utils.data as data
 import torch.backends.cudnn as cudnn
 import utils
 from models.unet import DiffusionUNet
+import time
 
 
 # This script is adapted from the following repositories
@@ -190,11 +191,13 @@ class DenoisingDiffusion(object):
     def sample_image(self, x_cond, x, last=True, patch_locs=None, patch_size=None):
         skip = self.config.diffusion.num_diffusion_timesteps // self.args.sampling_timesteps
         seq = range(0, self.config.diffusion.num_diffusion_timesteps, skip)
+
         if patch_locs is not None:
             xs = utils.sampling.generalized_steps_overlapping(x, x_cond, seq, self.model, self.betas, eta=0.,
                                                               corners=patch_locs, p_size=patch_size)
         else:
             xs = utils.sampling.generalized_steps(x, x_cond, seq, self.model, self.betas, eta=0.)
+
         if last:
             xs = xs[0][-1]
         return xs
