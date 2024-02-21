@@ -20,14 +20,14 @@ class AllWeather:
             print("=> evaluating raindrop test set...")
             path = os.path.join(self.config.data.data_dir, 'data', 'raindrop')
             filename = 'raindroptesta.txt'
-        elif validation == 'rainfog':
+        elif validation == 'outdoorrain':
             print("=> evaluating outdoor rain-fog test set...")
-            path = os.path.join(self.config.data.data_dir, 'data', 'rainfog')
+            path = os.path.join(self.config.data.data_dir, 'data', 'outdoorrain')
             filename = 'test1.txt'
         else:   # snow
             print("=> evaluating snowtest100K-L...")
             path = os.path.join(self.config.data.data_dir, 'data', 'snow100k')
-            filename = 'snowtest100k_L.txt'
+            filename = 'snowtest100k_L_500.txt'
 
         train_dataset = AllWeatherDataset(os.path.join(self.config.data.data_dir, 'data', 'allweather'),
                                           n=self.config.training.patch_n,
@@ -95,9 +95,15 @@ class AllWeatherDataset(torch.utils.data.Dataset):
         return tuple(crops)
 
     def get_images(self, index):
-        input_name = self.input_names[index].replace("./", "")
-        gt_name = self.gt_names[index].replace("./", "")
-        gt_name = gt_name.replace("rain.", "clean.")
+        input_name = self.input_names[index]
+        gt_name = self.gt_names[index]
+        self.validation_name = input_name.split('/')[-3]
+        if self.validation_name == 'raindroptesta': # raindrop
+            gt_name = gt_name.replace("rain.", "clean.")
+        elif self.validation_name == 'test1': # outdoorrain
+            gt_name = gt_name.split('_')[0]+"_"+gt_name.split('_')[1]+".png"
+        else:
+            gt_name = gt_name
         img_id = re.split('/', input_name)[-1][:-4]
         aa = self.dir
         input_img = PIL.Image.open(os.path.join(self.dir, input_name)) if self.dir else PIL.Image.open(input_name)
@@ -126,8 +132,11 @@ class AllWeatherDataset(torch.utils.data.Dataset):
 
             wd_new = int(16 * (wd_new // 16))
             ht_new = int(16 * (ht_new // 16))
-            input_img = input_img.crop((0, 0, wd_new, ht_new))
-            gt_img = gt_img.crop((0, 0, wd_new, ht_new))
+            # input_img = input_img.crop((0, 0, wd_new, ht_new))
+            # gt_img = gt_img.crop((0, 0, wd_new, ht_new))
+
+            input_img = input_img.resize((wd_new, ht_new), PIL.Image.ANTIALIAS)
+            gt_img = gt_img.resize((wd_new, ht_new), PIL.Image.ANTIALIAS)
 
             return torch.cat([self.transforms(input_img), self.transforms(gt_img)], dim=0), img_id
 

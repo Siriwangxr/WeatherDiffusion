@@ -24,7 +24,7 @@ def parse_args_and_config():
     parser.add_argument("--sampling_timesteps", type=int, default=25,
                         help="Number of implicit sampling steps")
     parser.add_argument("--test_set", type=str, default='raindrop',
-                        help="restoration test set options: ['raindrop', 'snow', 'rainfog']")
+                        help="restoration test set options: ['raindrop', 'snow', 'outdoorrain']")
     parser.add_argument("--image_folder", default='results/images/', type=str,
                         help="Location to save restored images")
     parser.add_argument('--seed', default=61, type=int, metavar='N',

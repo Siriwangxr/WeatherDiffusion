@@ -66,7 +66,7 @@ def generalized_steps_overlapping(x, x_cond, seq, model, b, eta=0., corners=None
             et_output = torch.zeros_like(x_cond, device=x.device)
             
             if manual_batching:
-                manual_batching_size = 64
+                manual_batching_size = 128
                 xt_patch = torch.cat([crop(xt, hi, wi, p_size, p_size) for (hi, wi) in corners], dim=0)
                 x_cond_patch = torch.cat([data_transform(crop(x_cond, hi, wi, p_size, p_size)) for (hi, wi) in corners], dim=0)
                 for i in range(0, len(corners), manual_batching_size):

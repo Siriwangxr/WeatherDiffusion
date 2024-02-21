@@ -15,7 +15,7 @@ class OutdoorRain:
         self.config = config
         self.transforms = torchvision.transforms.Compose([torchvision.transforms.ToTensor()])
 
-    def get_loaders(self, parse_patches=True, validation='rainfog'):
+    def get_loaders(self, parse_patches=True, validation='outdoorrain'):
         print("=> evaluating outdoor rain-fog test set...")
         train_dataset = OutdoorRainDataset(dir=os.path.join(self.config.data.data_dir, 'data', 'outdoor-rain', 'train'),
                                            n=self.config.training.patch_n,
